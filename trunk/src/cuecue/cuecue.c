@@ -29,7 +29,7 @@
 
 #include "../libcuecue/cuecue.h"
 
-#define VERSIONSTRING "cuecue 0.2.0\n"
+#define VERSIONSTRING "cuecue 0.2.1\n"
 
 struct option long_options[] = {
     {"quiet", 0,0,'q'},
