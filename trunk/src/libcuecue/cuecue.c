@@ -246,6 +246,11 @@ int cue_ConvertToAudio(char *filename, char *destFolder, PROGRESS_CALLBACK callb
 
 	cuecue_error[0]=0;
 
+	if (!FileExists(filename)) {
+		snprintf(cuecue_error, CUECUE_ERROR_LENGTH,"Cannot open cue file: '%s'", filename);
+		return 0;
+	}
+
 	ext = strrchr(filename,'.');
 	str = (char*) malloc(strlen(filename)+10);
 
