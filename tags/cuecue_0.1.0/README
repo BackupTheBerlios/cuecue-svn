@@ -1,0 +1,60 @@
+
+ cuecue - audio converter
+ Copyright (C) 2004 Gautier Portet < kassoulet (ä) users.berlios.de >
+
+===============================================================================
+
+INTRODUCTION
+
+  cuecue is a suite (library, command line program, graphical frontend)
+  to convert .cue + [.ogg|.flac|.wav|.mp3] to .cue + .bin, in order to
+  make them easier to burn with standard burning software.
+
+===============================================================================
+
+BUILDING AND INSTALLING
+
+  Before you can build this package, you must first build and install the
+  libmad, libflac, libogg and libvorbis packages distributed separately.
+
+Windows Platforms
+
+  cuecue can be built under Windows using either MingW or Cygwin.
+  Follow the POSIX build intructions.
+
+POSIX Platforms
+
+  The code is distributed with a 'configure' script that will generate for
+  you a 'Makefile' in each of the subdirectories that
+  require them. See the file 'INSTALL' for generic instructions.
+
+  The specific options you may want to give 'configure' are:
+
+
+      --disable-flac
+      --disable-ogg
+      --disable-mp3
+
+  Other options are available, run 'configure --help' to get a list.
+
+
+===============================================================================
+
+COPYRIGHT AND AUTHOR
+
+  Please read the 'COPYRIGHT' file for copyright and warranty information.
+  Also, the file 'COPYING' contains the full text of the GNU GPL.
+
+  Send inquiries, comments, bug reports, suggestions, patches, etc. to:
+
+      Gautier Portet < kassoulet (ä) users.berlios.de >
+      http://kassoulet.free.fr
+
+  See also the following pages on the Web:
+
+      http://www.underbit.com/products/mad/
+      http://www.xiph.org/ogg/vorbis/
+      http://flac.sourceforge.net/
+
+===============================================================================
+
