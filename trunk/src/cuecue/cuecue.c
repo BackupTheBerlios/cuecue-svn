@@ -17,6 +17,8 @@
 
 #include <stdio.h>
 #include <getopt.h>
+#include <stdlib.h>
+#include <strings.h>
 
 #include "../libcuecue/cuecue.h"
 
@@ -69,7 +71,8 @@ static void parse_options(int argc, char **argv)
                 exit(0);
                 break;
             case 'o':
-                outfolder = strdup(optarg);
+                /*outfolder = strdup(optarg);*/
+		outfolder = optarg;
                 break;
             default:
                 fprintf(stderr, "Internal error: Unrecognised argument\n");

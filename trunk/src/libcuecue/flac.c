@@ -18,6 +18,10 @@
 
 #ifdef USE_FLAC
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "FLAC/all.h"
 
 #include "cuecue.h"
@@ -49,6 +53,8 @@ void error(const FLAC__FileDecoder *decoder, FLAC__StreamDecoderErrorStatus stat
 			strcpy(cuecue_error,"CRC Mismatch: FLAC file corrupted");
 			internal->error=1;
 			break;
+		default:
+			{}
 	}
 }
 

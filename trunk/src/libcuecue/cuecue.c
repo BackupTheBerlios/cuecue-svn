@@ -101,9 +101,6 @@ int cue_ConvertToAudio(char *filename, char *destFolder, PROGRESS_CALLBACK callb
 	char *audioFile=NULL;
 	char *binFile=NULL;
 	char *str;
-	int totalsize;
-	int currentsize;
-	int previousPercent=0;
 	int i;
 
 	cuecue_error[0]=0;

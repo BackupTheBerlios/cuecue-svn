@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <mad.h>
 
@@ -229,7 +230,6 @@ enum mad_flow output(void *data,
 {
 	Internal *internal=data;
 	struct audio_stats stats;
-	mad_fixed_t const *left_ch, *right_ch;
 	int written;
 
 	/* convert to pcm */
