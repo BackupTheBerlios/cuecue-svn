@@ -1,0 +1,10 @@
+
+ cuecue - audio converter
+ Copyright (C) 2004 Gautier Portet
+
+===============================================================================
+
+  0.2.0 win32 fixes: segfault, initial directory fixed, messageboxes for errors
+
+===============================================================================
+
