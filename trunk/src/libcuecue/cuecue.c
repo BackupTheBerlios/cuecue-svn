@@ -23,6 +23,9 @@
 #include "cuecue_internal.h"
 
 
+#define LINE_MAX 1024
+
+
 FUNC_DECODER decoders[]=
 {
 #ifdef USE_MP3
@@ -67,15 +70,37 @@ int Decode(char* file_source, char* file_destination, PROGRESS_CALLBACK callback
        	return decoders[i](file_source, file_destination, callback);
 }
 
-static
-int FindFileInCue(char *cue, char *filename)
-{
 
-}
-
-static
-int FindFileInFolder(char *filename)
+static int readline(FILE *f, char *line, int maxlen)
 {
+	int pos=0;
+
+	*line=0;
+	while(1) {
+		int c;
+
+		c = fgetc(f);
+
+		if (c==EOF) {
+			if (pos) {
+				return 1;
+			} else {
+				return 0;
+			}
+
+		}
+
+		if ( (c=='\n') || (c=='\r')) {
+			return 1;
+		}
+		*line++=c;
+		*line=0;
+		pos++;
+
+		if (pos>=maxlen) {
+			return 0;
+		}
+	}
 }
 
 static
@@ -90,6 +115,120 @@ int FileExists(char *filename)
 	return 1;
 }
 
+static
+int FindFileInCue(char *cue, char *filename)
+{
+	char line[LINE_MAX];
+	FILE *f;
+	int end=0;
+	int result=0;
+
+	f = fopen(cue,"rb");
+	if (f==NULL) {
+		return 0;
+	}
+
+	do {
+		if (!readline(f,line,LINE_MAX)) {
+			end=1;
+		}
+		if (strncmp(line,"FILE",4)==0) {
+			/* TODO: fix ugly code */
+			char *s_start, *s_end;
+			s_start = strchr(line,'\"');
+			s_end   = strchr(s_start+1,'\"');
+
+			strncpy(filename, s_start+1, s_end-s_start-1);
+			filename[s_end-s_start-1]=0;
+
+			if (FileExists(filename)) {
+				result=1;
+			}
+
+			end=1;
+		}
+	} while(!end);
+
+	fclose(f);
+
+	return result;
+}
+
+static
+int FindFileInFolder(char *filename, char *cuefile)
+{
+	char *str;
+	char *ext;
+	int i;
+	int found=0;
+
+	ext = strrchr(filename,'.');
+	str = (char*) malloc(strlen(filename)+10);
+
+	for(i=0; i<DECODER_MAX; i++) {
+		char *ext;
+
+		strcpy(str,filename);
+		ext = strrchr(str,'.');
+		strcpy(ext,Extensions[i]);
+		if (FileExists(str)) {
+			strcpy(cuefile,str);
+			found=1;
+			break;
+		}
+	}
+
+	free(str);
+
+	if (found) {
+		return 1;
+	}
+	return 0;
+}
+
+
+static
+int ConvertCueFile(char *original, char *cuecue, char *bin)
+{
+	char line[LINE_MAX];
+	FILE *src;
+	FILE *dst;
+	int end=0;
+	int result=0;
+
+	src = fopen(original, "rb");
+	if (src==NULL) {
+		snprintf(cuecue_error,CUECUE_ERROR_LENGTH,"Cannot open '%s'",original);
+		return 0;
+	}
+
+	dst = fopen(cuecue, "wb");
+	if (dst==NULL) {
+		fclose(src);
+		snprintf(cuecue_error,CUECUE_ERROR_LENGTH,"Cannot open '%s' for writing",cuecue);
+		return 0;
+	}
+
+	while (readline(src,line,LINE_MAX)) {
+		if (strncmp(line,"FILE",4)==0) {
+
+			fprintf(dst, "FILE \"%s\" BINARY\r\n", bin);
+
+		} else {
+			if (strlen(line)>0) {
+				fprintf(dst, "%s\r\n", line);
+			}
+		}
+
+	}
+
+	fclose(src);
+	fclose(dst);
+
+	return 1;
+}
+
+
 char * cue_GetError()
 {
 	return cuecue_error;
@@ -100,47 +239,53 @@ int cue_ConvertToAudio(char *filename, char *destFolder, PROGRESS_CALLBACK callb
 	char *ext;
 	char *audioFile=NULL;
 	char *binFile=NULL;
+	char *cueFile=NULL;
 	char *str;
 	int i;
+	int result=0;
 
 	cuecue_error[0]=0;
 
 	ext = strrchr(filename,'.');
-	str = (char*) malloc(strlen(filename)+1);
+	str = (char*) malloc(strlen(filename)+10);
 
 	if (destFolder!=NULL) {
-		binFile = (char*) malloc(strlen(filename)+strlen(destFolder)+10);
+		binFile = (char*) malloc(strlen(filename)+strlen(destFolder)+20);
 		strcpy(binFile,destFolder);
 		strcat(binFile,filename);
 	} else {
-		binFile = (char*) malloc(strlen(filename)+10);
+		binFile = (char*) malloc(strlen(filename)+20);
 		strcpy(binFile,filename);
 	}
-		ext = strrchr(binFile,'.');
-		strcpy(ext,".bin");
+	ext = strrchr(binFile,'.');
+	strcpy(ext,".cuecue.bin");
 
-	for(i=0; i<DECODER_MAX; i++) {
-		char *ext;
+	cueFile = (char*) malloc(strlen(filename)+20);
+	strcpy(cueFile,filename);
+	ext = strrchr(cueFile,'.');
+	strcpy(ext,".cuecue.cue");
 
-		strcpy(str,filename);
-		ext = strrchr(str,'.');
-		strcpy(ext,Extensions[i]);
-		if (FileExists(str)) {
-			audioFile = str;
-			break;
-		}
+	audioFile = (char*) malloc(strlen(filename)+20);
+	*audioFile= 0;
+
+	if ( ! FindFileInCue(filename, audioFile)) {
+		FindFileInFolder(filename, audioFile);
 	}
 
-	if (audioFile) {
-		if ( ! Decode(audioFile,binFile,callback)) {
-			return 0;
+	if (*audioFile) {
+		if ( Decode(audioFile, binFile, callback) ) {
+			if ( ConvertCueFile(filename, cueFile, binFile)) {
+				result=1;
+			}
 		}
 	}
 
 	free(str);
 	free(binFile);
+	free(cueFile);
+	free(audioFile);
 
-	return 1;
+	return result;
 }
 
 

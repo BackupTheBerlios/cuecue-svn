@@ -148,7 +148,7 @@ unsigned int audio_pcm_s16le(unsigned char *data, unsigned int nsamples,
 		sample0 = audio_linear_dither(16, *left++,  &left_dither,  stats);
 		sample1 = audio_linear_dither(16, *right++, &right_dither, stats);
 
-		data[0] = sample0 &255; /* >>0*/
+		data[0] = sample0 &255;
 		data[1] = sample0 >> 8;
 		data[2] = sample1 &255;
 		data[3] = sample1 >> 8;
@@ -201,6 +201,8 @@ enum mad_flow input(void *data,
 	*  of the buffer and appending new data after it, before calling
 	*  mad_stream_buffer()"
 	*           -- Rob Leslie, on the mad-dev mailing list */
+
+	/* every time you use libmad, God kills a kitten :) */
 
 	if(stream->next_frame) {
 		unconsumedBytes = internal->buffer + BUFFER_SIZE - stream->next_frame;

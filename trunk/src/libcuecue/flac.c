@@ -42,9 +42,8 @@ void error(const FLAC__FileDecoder *decoder, FLAC__StreamDecoderErrorStatus stat
 {
 	Internal *internal = client_data;
 	switch (status) {
-		/* is this minor ?
 		case FLAC__STREAM_DECODER_ERROR_STATUS_LOST_SYNC:
-			break;*/
+			break;
 		case FLAC__STREAM_DECODER_ERROR_STATUS_BAD_HEADER:
 			strcpy(cuecue_error,"Bad Header in FLAC file");
 			internal->error=1;
@@ -53,8 +52,6 @@ void error(const FLAC__FileDecoder *decoder, FLAC__StreamDecoderErrorStatus stat
 			strcpy(cuecue_error,"CRC Mismatch: FLAC file corrupted");
 			internal->error=1;
 			break;
-		default:
-			{}
 	}
 }
 
