@@ -23,9 +23,13 @@
 #include <stdlib.h>
 #include <strings.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include "../libcuecue/cuecue.h"
 
-#define VERSIONSTRING "cuecue 0.1.0\n"
+#define VERSIONSTRING "cuecue 0.2.0\n"
 
 struct option long_options[] = {
     {"quiet", 0,0,'q'},
@@ -91,6 +95,9 @@ void progress(float fprogress)
 	int progress = (int) (fprogress*100.0f);
 	static int old_progress=-1;
 
+	if (quiet) {
+		return;
+	}
 	if (old_progress==progress) {
 		return;
 	}
@@ -112,10 +119,22 @@ void progress(float fprogress)
 int main(int argc, char **argv)
 {
 	int result;
+#ifdef _WIN32
+	char path[1024];
+	char *ext;
+	strcpy(path,argv[0]);
+	ext = strrchr(path,'\\');
+	*ext=0;
+	chdir(path);
+#endif
 
 	if(argc == 1) {
+#ifdef _WIN32
+		MessageBox(NULL,"Drop a file on this program","Error",MB_OK|MB_ICONINFORMATION|MB_SETFOREGROUND);
+#else
 		fprintf(stderr, VERSIONSTRING);
 		usage();
+#endif
 		return 1;
 	}
 
@@ -132,12 +151,17 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	fprintf(stderr, "Converting: '%s'\n",argv[optind]);
-
+	if(!quiet) {
+		fprintf(stderr, "Converting: '%s'\n",argv[optind]);
+	}
 	result = cue_ConvertToAudio( argv[optind], outfolder, quiet ? NULL : progress );
 
 	if (!result) {
+#ifdef _WIN32
+		MessageBox(NULL,cue_GetError(),"Error",MB_OK|MB_ICONERROR|MB_SETFOREGROUND);
+#else
 		fprintf(stderr, "ERROR: %s\n",cue_GetError());
+#endif
 	}
 
 	return 0;

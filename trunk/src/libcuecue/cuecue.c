@@ -263,12 +263,12 @@ int cue_ConvertToAudio(char *filename, char *destFolder, PROGRESS_CALLBACK callb
 		strcpy(binFile,filename);
 	}
 	ext = strrchr(binFile,'.');
-	strcpy(ext,".cuecue.bin");
+	strcpy(ext,".audio.bin");
 
 	cueFile = (char*) malloc(strlen(filename)+20);
 	strcpy(cueFile,filename);
 	ext = strrchr(cueFile,'.');
-	strcpy(ext,".cuecue.cue");
+	strcpy(ext,".audio.cue");
 
 	audioFile = (char*) malloc(strlen(filename)+20);
 	*audioFile= 0;

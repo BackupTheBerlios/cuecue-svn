@@ -5,7 +5,7 @@ dnl AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR(src/libcuecue/cuecue.c)
 
 
-VERSION=0.1.0
+VERSION=0.2.0
 PACKAGE="cuecue"
 
 AC_SUBST(VERSION)
