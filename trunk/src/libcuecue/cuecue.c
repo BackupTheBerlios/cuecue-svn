@@ -24,7 +24,7 @@
 
 
 #define LINE_MAX 1024
-
+#define FILENAME_MAX 1024
 
 FUNC_DECODER decoders[]=
 {
@@ -52,7 +52,7 @@ char Extensions[][6]=
 #endif
 };
 
-char cuecue_error[1024]="";
+char cuecue_error[CUECUE_ERROR_LENGTH]="";
 
 static
 int Decode(char* file_source, char* file_destination, PROGRESS_CALLBACK callback)
@@ -140,7 +140,7 @@ int FindFileInCue(char *cue, char *filename)
 			s_end   = strchr(s_start+1,'\"');
 
 			if (s_end-s_start<1000) {
-				
+
 				strncpy(filename, s_start+1, s_end-s_start-1);
 				filename[s_end-s_start-1]=0;
 
@@ -160,31 +160,26 @@ int FindFileInCue(char *cue, char *filename)
 static
 int FindFileInFolder(char *filename, char *cuefile)
 {
-	char *str;
+	char str[FILENAME_MAX];
 	char *ext;
 	int i;
 	int found=0;
 
 	ext = strrchr(filename,'.');
-	str = (char*) malloc(strlen(filename)+10);
 
 	for(i=0; i<DECODER_MAX; i++) {
 		char *ext;
 
 		strcpy(str,filename);
 		ext = strrchr(str,'.');
-		strcpy(ext,Extensions[i]);
-		if (FileExists(str)) {
-			strcpy(cuefile,str);
-			found=1;
-			break;
+		if (ext!=NULL) {
+			strcpy(ext,Extensions[i]);
+			if (FileExists(str)) {
+				strcpy(cuefile,str);
+				found=1;
+				return 1;
+			}
 		}
-	}
-
-	free(str);
-
-	if (found) {
-		return 1;
 	}
 	return 0;
 }
@@ -196,8 +191,7 @@ int ConvertCueFile(char *original, char *cuecue, char *bin)
 	char line[LINE_MAX];
 	FILE *src;
 	FILE *dst;
-	int end=0;
-	int result=0;
+	int found=0;
 
 	src = fopen(original, "rb");
 	if (src==NULL) {
@@ -214,19 +208,22 @@ int ConvertCueFile(char *original, char *cuecue, char *bin)
 
 	while (readline(src,line,LINE_MAX)) {
 		if (strncmp(line,"FILE",4)==0) {
-
 			fprintf(dst, "FILE \"%s\" BINARY\r\n", bin);
-
+			found=1;
 		} else {
 			if (strlen(line)>0) {
 				fprintf(dst, "%s\r\n", line);
 			}
 		}
-
 	}
 
 	fclose(src);
 	fclose(dst);
+
+	if (!found) {
+		snprintf(cuecue_error,CUECUE_ERROR_LENGTH,"'%s' does not contain a FILE section",cuecue);
+		return 0;
+	}
 
 	return 1;
 }
@@ -240,44 +237,42 @@ char * cue_GetError()
 int cue_ConvertToAudio(char *filename, char *destFolder, PROGRESS_CALLBACK callback)
 {
 	char *ext;
-	char *audioFile=NULL;
-	char *binFile=NULL;
-	char *cueFile=NULL;
-	char *str;
-	int i;
+	char audioFile[FILENAME_MAX];
+	char binFile[FILENAME_MAX];
+	char cueFile[FILENAME_MAX];
 	int result=0;
 
 	cuecue_error[0]=0;
 
 	if (!FileExists(filename)) {
-		snprintf(cuecue_error, CUECUE_ERROR_LENGTH,"Cannot open cue file: '%s'", filename);
+		snprintf(cuecue_error, CUECUE_ERROR_LENGTH,"Cannot open cue file '%s'", filename);
 		return 0;
 	}
 
-	ext = strrchr(filename,'.');
-	str = (char*) malloc(strlen(filename)+10);
-
 	if (destFolder!=NULL) {
-		binFile = (char*) malloc(strlen(filename)+strlen(destFolder)+20);
 		strcpy(binFile,destFolder);
 		strcat(binFile,filename);
 	} else {
-		binFile = (char*) malloc(strlen(filename)+20);
 		strcpy(binFile,filename);
 	}
 	ext = strrchr(binFile,'.');
+	if (ext==NULL) {
+		ext=binFile+strlen(binFile);
+	}
 	strcpy(ext,".audio.bin");
 
-	cueFile = (char*) malloc(strlen(filename)+20);
 	strcpy(cueFile,filename);
 	ext = strrchr(cueFile,'.');
+	if (ext==NULL) {
+		ext=cueFile+strlen(cueFile);
+	}
 	strcpy(ext,".audio.cue");
 
-	audioFile = (char*) malloc(strlen(filename)+2000);
-	*audioFile= 0;
-
-	if ( ! FindFileInCue(filename, audioFile)) {
-		FindFileInFolder(filename, audioFile);
+	if ( !FindFileInCue(filename, audioFile)) {
+		if ( !FindFileInFolder(filename, audioFile)) {
+			snprintf(cuecue_error, CUECUE_ERROR_LENGTH,"Cannot open audio file associed with '%s'", filename);
+			return 0;
+		}
 	}
 
 	if (*audioFile) {
@@ -287,11 +282,6 @@ int cue_ConvertToAudio(char *filename, char *destFolder, PROGRESS_CALLBACK callb
 			}
 		}
 	}
-
-	free(str);
-	free(binFile);
-	free(cueFile);
-	free(audioFile);
 
 	return result;
 }

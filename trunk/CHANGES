@@ -4,7 +4,13 @@
 
 ===============================================================================
 
-  0.2.0 win32 fixes: segfault, initial directory fixed, messageboxes for errors
+  0.2.1 cue presence verification
+        segfault fixed
+
+  0.2.0 win32 fixes: segfault
+                     initial directory fixed
+		     messageboxes for errors
+
 
 ===============================================================================
 
