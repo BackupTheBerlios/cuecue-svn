@@ -62,6 +62,7 @@ int Decode(char* file_source, char* file_destination, PROGRESS_CALLBACK callback
 	for(i=0; i<DECODER_MAX; i++) {
 		char *ext;
 		ext = strrchr(file_source,'.');
+
 		if (strcmp(ext,Extensions[i])==0) {
 			break;
 		}
@@ -138,19 +139,21 @@ int FindFileInCue(char *cue, char *filename)
 			s_start = strchr(line,'\"');
 			s_end   = strchr(s_start+1,'\"');
 
-			strncpy(filename, s_start+1, s_end-s_start-1);
-			filename[s_end-s_start-1]=0;
+			if (s_end-s_start<1000) {
+				
+				strncpy(filename, s_start+1, s_end-s_start-1);
+				filename[s_end-s_start-1]=0;
 
-			if (FileExists(filename)) {
-				result=1;
+				if (FileExists(filename)) {
+					result=1;
+				}
+
+				end=1;
 			}
-
-			end=1;
 		}
 	} while(!end);
 
 	fclose(f);
-
 	return result;
 }
 
@@ -270,7 +273,7 @@ int cue_ConvertToAudio(char *filename, char *destFolder, PROGRESS_CALLBACK callb
 	ext = strrchr(cueFile,'.');
 	strcpy(ext,".audio.cue");
 
-	audioFile = (char*) malloc(strlen(filename)+20);
+	audioFile = (char*) malloc(strlen(filename)+2000);
 	*audioFile= 0;
 
 	if ( ! FindFileInCue(filename, audioFile)) {

@@ -5,6 +5,9 @@ dnl AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR(src/libcuecue/cuecue.c)
 
 
+CFLAGS="$CFLAGS -Wall -ansi -pedantic -g -Os"
+CFLAGS="$CFLAGS -Wall -ansi -pedantic -g "
+
 VERSION=0.2.0
 PACKAGE="cuecue"
 
@@ -68,7 +71,6 @@ case "$target" in
 esac
 AM_CONDITIONAL(WIN32, test x$win32 = xyes)
 
-CFLAGS="$CFLAGS -Wall -ansi -pedantic -g -Os"
 
 
 
