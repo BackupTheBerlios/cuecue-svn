@@ -16,8 +16,14 @@ DIST_SUBDIRS = $(SUBDIRS)
 # All the rest of the distributed files
 EXTRA_DIST =		\
 	autogen.sh \
-	makedist.sh 
+	makedist.sh \
+	CHANGES \
+	COPYING \
+	COPYRIGHT \
+	README \
+	TODO
+
 
 # Rule to build tar-gzipped distribution package
 $(PACKAGE)-$(VERSION).tar.gz: dist
-	
+

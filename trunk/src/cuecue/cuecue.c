@@ -1,4 +1,4 @@
-/* libcuecue - (c) 2004 Gautier Portet < kassoulet (ä) users.berlios.de >
+/* cuecue - (c) 2004 Gautier Portet < kassoulet (ä) users.berlios.de >
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,6 +13,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ * $Id: $
+ *
  */
 
 #include <stdio.h>
@@ -22,7 +25,7 @@
 
 #include "../libcuecue/cuecue.h"
 
-#define VERSIONSTRING "cuecue 0.1\n"
+#define VERSIONSTRING "cuecue 0.1.0\n"
 
 struct option long_options[] = {
     {"quiet", 0,0,'q'},

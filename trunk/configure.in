@@ -4,9 +4,8 @@ dnl AM_INIT_AUTOMAKE
 
 AC_CONFIG_SRCDIR(src/libcuecue/cuecue.c)
 
-CFLAGS="$CFLAGS -Wall -ansi -pedantic -g"
 
-VERSION=0.9.0
+VERSION=0.1.0
 PACKAGE="cuecue"
 
 AC_SUBST(VERSION)
@@ -60,7 +59,16 @@ if test x$enable_flac = xyes; then
    AC_DEFINE(USE_FLAC)
 fi
 
+dnl detect win32
+case "$target" in
+    *-*-cygwin* | *-*-mingw32*)
+	echo "WIN32 resource linking (icon support)"
+	win32=yes
+        ;;
+esac
+AM_CONDITIONAL(WIN32, test x$win32 = xyes)
 
+CFLAGS="$CFLAGS -Wall -ansi -pedantic -g -Os"
 
 
 
